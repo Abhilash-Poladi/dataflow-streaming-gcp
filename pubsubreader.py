@@ -70,9 +70,22 @@ def run():
             #         "window_end_ts": x[3]
             #     }
             # )
-            | "LogResults" >> beam.Map(
-                lambda x: logging.info(f"REAL-TIME METRIC: {x}")
-            )        
+            # | "LogResults" >> beam.Map(
+            #     lambda x: logging.info(f"REAL-TIME METRIC: {x}")
+            # )   
+            | "WriteToBigQuery" >> beam.io.WriteToBigQuery(
+    table="project-26fb084d-6d96-4ec6-8a7:my_dataset.realtime_sales",
+    schema={
+        "fields": [
+            {"name": "store_id", "type": "STRING", "mode": "REQUIRED"},
+            {"name": "total_sales_amount", "type": "FLOAT", "mode": "REQUIRED"},
+            {"name": "window_start", "type": "STRING", "mode": "REQUIRED"},
+            {"name": "window_end", "type": "STRING", "mode": "REQUIRED"},
+        ]
+    },
+    write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
+    create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
+)
         )
 
 
